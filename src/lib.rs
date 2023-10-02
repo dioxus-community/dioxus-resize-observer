@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 use js_sys::Array as JsArray;
+use std::rc::Rc;
 use wasm_bindgen::closure::Closure as JsClosure;
 use wasm_bindgen::JsCast;
 use web_sys::ResizeObserver;
@@ -21,16 +22,33 @@ pub fn use_on_resize(
     cx: Scope,
     mut handler: impl FnMut(ResizeObserverEntry) + 'static,
 ) -> &Observer {
-    use_state(cx, || {
+    let observer = use_state(cx, || {
         Observer::new(move |size: ResizeObserverEntry| {
             handler(size);
         })
-    })
+    });
+
+    let unmount_observer = observer.clone();
+    use_on_unmount(cx, move || {
+        if let Some((resize_observer, target)) =
+            unmount_observer.resize_observer.borrow_mut().take()
+        {
+            let raw_elem = target
+                .get_raw_element()
+                .unwrap()
+                .downcast_ref::<web_sys::Element>()
+                .unwrap();
+            resize_observer.unobserve(raw_elem);
+        }
+    });
+
+    observer
 }
 
 /// Resize observer
 pub struct Observer {
     closure: JsClosure<dyn FnMut(JsArray)>,
+    resize_observer: RefCell<Option<(ResizeObserver, Rc<MountedData>)>>,
 }
 
 impl Observer {
@@ -42,19 +60,22 @@ impl Observer {
             callback(entry);
         });
 
-        Self { closure }
+        Self {
+            closure,
+            resize_observer: RefCell::default(),
+        }
     }
 
     /// Mount the observer to a mounted element.
-    pub fn mount(&self, element: &MountedData) {
+    pub fn mount(&self, element: Rc<MountedData>) {
         let raw_elem = element
             .get_raw_element()
             .unwrap()
             .downcast_ref::<web_sys::Element>()
             .unwrap();
 
-        ResizeObserver::new(self.closure.as_ref().unchecked_ref())
-            .unwrap()
-            .observe(raw_elem);
+        let resize_observer = ResizeObserver::new(self.closure.as_ref().unchecked_ref()).unwrap();
+        resize_observer.observe(raw_elem);
+        *self.resize_observer.borrow_mut() = Some((resize_observer, element));
     }
 }
