@@ -68,14 +68,38 @@ impl Observer {
 
     /// Mount the observer to a mounted element.
     pub fn mount(&self, element: Rc<MountedData>) {
+        // Skip mounting if an observer is already stored.
+        if self.resize_observer.borrow().is_some() {
+            return;
+        }
+
+        // Get the current raw JS element.
         let raw_elem = element
             .get_raw_element()
             .unwrap()
             .downcast_ref::<web_sys::Element>()
             .unwrap();
 
-        let resize_observer = ResizeObserver::new(self.closure.as_ref().unchecked_ref()).unwrap();
+        // Create the ResizeObserver and observe the current element.
+        let f = self.closure.as_ref().unchecked_ref();
+        let resize_observer = ResizeObserver::new(f).unwrap();
         resize_observer.observe(raw_elem);
+
+        // Set the current resize observer so it can be dropped later.
         *self.resize_observer.borrow_mut() = Some((resize_observer, element));
+    }
+
+    pub fn unmount(&self) {
+        if let Some((resize_observer, target)) = &*self.resize_observer.borrow() {
+            // Get the stored raw JS element.
+            let raw_elem = target
+                .get_raw_element()
+                .unwrap()
+                .downcast_ref::<web_sys::Element>()
+                .unwrap();
+
+            // Unobserve resizes.
+            resize_observer.unobserve(raw_elem);
+        }
     }
 }
