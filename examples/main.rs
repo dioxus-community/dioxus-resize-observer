@@ -12,7 +12,7 @@ fn App(cx: Scope) -> Element {
         })
         .unwrap_or_default();
 
-    render! {div { onmounted: move |event| { observer.mount(&event) }, "Size: {width} x {height}" }}
+    render! (div { onmounted: move |event| { observer.mount(&event) }, "Size: {width} x {height}" })
 }
 
 fn main() {
