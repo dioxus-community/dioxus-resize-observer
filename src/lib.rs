@@ -7,7 +7,7 @@ use web_sys::ResizeObserver;
 use web_sys::ResizeObserverEntry;
 
 /// Hook to get an element's size, updating on changes.
-pub fn use_resize_observer(cx: Scope) -> (Option<ResizeObserverEntry>, &Observer) {
+pub fn use_resize_observer<T>(cx: Scope<T>) -> (Option<ResizeObserverEntry>, &Observer) {
     let size = use_ref(cx, || None);
     let observer = {
         to_owned![size];
@@ -18,8 +18,8 @@ pub fn use_resize_observer(cx: Scope) -> (Option<ResizeObserverEntry>, &Observer
 }
 
 /// Hook to observe changes to an element's size.
-pub fn use_on_resize(
-    cx: Scope,
+pub fn use_on_resize<T>(
+    cx: Scope<T>,
     mut handler: impl FnMut(ResizeObserverEntry) + 'static,
 ) -> &Observer {
     let observer = use_state(cx, || {
