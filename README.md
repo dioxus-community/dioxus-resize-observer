@@ -4,30 +4,52 @@
 Resize observer hooks for [Dioxus 🧬](https://dioxuslabs.com/).
 
 ## Support
-- **Dioxus v0.4** 🧬
+- **0.1.0 - Dioxus v0.4** 🧬 **git - Dioxus v0.5**
 - Web renderer (WASM)
 
-## Example
+## Examples
 
+## Signals
 ```rust
-fn App(cx: Scope) -> Element {
-    let (event, observer) = use_size(cx);
-    let (width, height) = event
-        .map(|entry| {
-            let rect = entry.content_rect();
-            (rect.width(), rect.height())
-        })
-        .unwrap_or_default();
+let resize = use_resize_signal(cx);
+let (width, height) = resize
+    .read()
+    .as_ref()
+    .map(|entry| {
+        let rect = entry.content_rect();
+        (rect.width(), rect.height())
+    })
+    .unwrap_or_default();
 
-    render!(
-      div { 
-        onmounted: move |event| {
-          observer.mount(&event)
-        },
-        "Size: {width} x {height}"
-      }
-    )
-}
+render!(
+  div { 
+    onmounted: move |event| {
+      resize.observer.mount(&event)
+    },
+    "Size: {width} x {height}"
+  }
+)
 ```
 
-MIT License
+## Observer
+```rust
+let (event, observer) = use_size(cx);
+let (width, height) = event
+    .map(|entry| {
+        let rect = entry.content_rect();
+        (rect.width(), rect.height())
+    })
+    .unwrap_or_default();
+
+render!(
+  div { 
+    onmounted: move |event| {
+      observer.mount(&event)
+    },
+    "Size: {width} x {height}"
+  }
+)
+```
+
+## License
+MIT

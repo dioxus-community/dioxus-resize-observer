@@ -1,10 +1,14 @@
 use dioxus::prelude::*;
+use dioxus_signals::use_signal;
 use js_sys::Array as JsArray;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure as JsClosure;
 use wasm_bindgen::JsCast;
 use web_sys::ResizeObserver;
 use web_sys::ResizeObserverEntry;
+use dioxus_signals::ReadOnlySignal;
+
 
 /// Hook to get an element's size, updating on changes.
 pub fn use_resize_observer<T>(cx: Scope<T>) -> (Option<ResizeObserverEntry>, &Observer) {
@@ -101,5 +105,28 @@ impl Observer {
             // Unobserve resizes.
             resize_observer.unobserve(raw_elem);
         }
+    }
+}
+
+pub fn use_resize_signal<T>(cx: Scope<T>) -> UseResizeSignal {
+    let signal = use_signal(cx, || None);
+
+    UseResizeSignal {
+        signal: ReadOnlySignal::new(signal),
+        observer: use_on_resize(cx, move |entry| signal.set(Some(entry))),
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct UseResizeSignal<'a> {
+    pub signal: ReadOnlySignal<Option<ResizeObserverEntry>>,
+    pub observer: &'a Observer,
+}
+
+impl Deref for UseResizeSignal<'_> {
+    type Target = ReadOnlySignal<Option<ResizeObserverEntry>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.signal
     }
 }
