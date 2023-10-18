@@ -11,24 +11,19 @@ Resize observer hooks for [Dioxus 🧬](https://dioxuslabs.com/).
 
 ## Signals
 ```rust
-let resize = use_resize_signal(cx);
-let (width, height) = resize
-    .read()
-    .as_ref()
-    .map(|entry| {
-        let rect = entry.content_rect();
-        (rect.width(), rect.height())
-    })
-    .unwrap_or_default();
+use dioxus::prelude::*;
+use dioxus_resize_observer::use_size;
+use dioxus_signals::use_signal;
 
-render!(
-  div { 
-    onmounted: move |event| {
-      resize.observer.mount(&event)
-    },
-    "Size: {width} x {height}"
-  }
-)
+fn app(cx: Scope) -> Element {
+    let element_ref = use_signal(cx, || None);
+    let (width, height) = use_size(cx, element_ref);
+
+    render!(div {
+      onmounted: move |event| element_ref.set(Some(event.data)),
+      "Size: {width} x {height}"
+    })
+}
 ```
 
 ## Observer

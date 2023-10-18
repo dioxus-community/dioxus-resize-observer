@@ -1,132 +1,74 @@
 use dioxus::prelude::*;
 use dioxus_signals::use_signal;
-use js_sys::Array as JsArray;
-use std::ops::Deref;
+use dioxus_signals::Signal;
+use js_sys::Array;
 use std::rc::Rc;
-use wasm_bindgen::closure::Closure as JsClosure;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
 use web_sys::ResizeObserver;
 use web_sys::ResizeObserverEntry;
-use dioxus_signals::ReadOnlySignal;
-
 
 /// Hook to get an element's size, updating on changes.
-pub fn use_resize_observer<T>(cx: Scope<T>) -> (Option<ResizeObserverEntry>, &Observer) {
-    let size = use_ref(cx, || None);
-    let observer = {
-        to_owned![size];
-        use_on_resize(cx, move |new_size| size.set(Some(new_size)))
-    };
-
-    (size.read().clone(), observer)
+pub fn use_size<T>(cx: Scope<T>, element_ref: Signal<Option<Rc<MountedData>>>) -> (f64, f64) {
+    let resize = use_resize(cx, element_ref);
+    let resize_ref = resize.read();
+    resize_ref.unwrap_or_default()
 }
 
-/// Hook to observe changes to an element's size.
-pub fn use_on_resize<T>(
+/// Hook to get an element's resize events, updating on changes.
+pub fn use_resize<T>(
     cx: Scope<T>,
-    mut handler: impl FnMut(ResizeObserverEntry) + 'static,
-) -> &Observer {
-    let observer = use_state(cx, || {
-        Observer::new(move |size: ResizeObserverEntry| {
-            handler(size);
-        })
-    });
+    element_ref: Signal<Option<Rc<MountedData>>>,
+) -> Signal<Option<(f64, f64)>> {
+    let state_ref: Signal<Option<State>> = use_signal(cx, || None);
+    let size_ref = use_signal(cx, || None);
 
-    let unmount_observer = observer.clone();
-    use_on_unmount(cx, move || {
-        if let Some((resize_observer, target)) =
-            unmount_observer.resize_observer.borrow_mut().take()
-        {
-            let raw_elem = target
+    dioxus_signals::use_effect(cx, move || {
+        if let Some(mounted) = element_ref.read().clone() {
+            maybe_unobserve(state_ref);
+
+            let on_resize = Closure::<dyn FnMut(Array)>::new(move |entries: Array| {
+                let entry = entries.at(0);
+                let entry: ResizeObserverEntry = entry.dyn_into().unwrap();
+                let rect = entry.content_rect();
+                size_ref.set(Some((rect.width(), rect.height())));
+            });
+            let resize_observer = ResizeObserver::new(on_resize.as_ref().unchecked_ref()).unwrap();
+
+            let raw_elem = mounted
                 .get_raw_element()
                 .unwrap()
                 .downcast_ref::<web_sys::Element>()
                 .unwrap();
-            resize_observer.unobserve(raw_elem);
+            resize_observer.observe(raw_elem);
+
+            state_ref.set(Some(State {
+                on_resize,
+                resize_observer,
+                mounted,
+            }));
+        } else {
+            maybe_unobserve(state_ref);
         }
     });
 
-    observer
+    size_ref
 }
 
-/// Resize observer
-pub struct Observer {
-    closure: JsClosure<dyn FnMut(JsArray)>,
-    resize_observer: RefCell<Option<(ResizeObserver, Rc<MountedData>)>>,
+struct State {
+    on_resize: Closure<dyn FnMut(Array)>,
+    resize_observer: ResizeObserver,
+    mounted: Rc<MountedData>,
 }
 
-impl Observer {
-    fn new(mut callback: impl FnMut(ResizeObserverEntry) + 'static) -> Self {
-        let closure = JsClosure::<dyn FnMut(JsArray)>::new(move |entries: JsArray| {
-            let entry = entries.at(0);
-            let entry: ResizeObserverEntry = entry.dyn_into().unwrap();
-
-            callback(entry);
-        });
-
-        Self {
-            closure,
-            resize_observer: RefCell::default(),
-        }
-    }
-
-    /// Mount the observer to a mounted element.
-    pub fn mount(&self, element: Rc<MountedData>) {
-        // Skip mounting if an observer is already stored.
-        if self.resize_observer.borrow().is_some() {
-            return;
-        }
-
-        // Get the current raw JS element.
-        let raw_elem = element
+fn maybe_unobserve(state_ref: Signal<Option<State>>) {
+    if let Some(state) = state_ref.write().take() {
+        let raw_elem = state
+            .mounted
             .get_raw_element()
             .unwrap()
             .downcast_ref::<web_sys::Element>()
             .unwrap();
-
-        // Create the ResizeObserver and observe the current element.
-        let f = self.closure.as_ref().unchecked_ref();
-        let resize_observer = ResizeObserver::new(f).unwrap();
-        resize_observer.observe(raw_elem);
-
-        // Set the current resize observer so it can be dropped later.
-        *self.resize_observer.borrow_mut() = Some((resize_observer, element));
-    }
-
-    pub fn unmount(&self) {
-        if let Some((resize_observer, target)) = &*self.resize_observer.borrow() {
-            // Get the stored raw JS element.
-            let raw_elem = target
-                .get_raw_element()
-                .unwrap()
-                .downcast_ref::<web_sys::Element>()
-                .unwrap();
-
-            // Unobserve resizes.
-            resize_observer.unobserve(raw_elem);
-        }
-    }
-}
-
-pub fn use_resize_signal<T>(cx: Scope<T>) -> UseResizeSignal {
-    let signal = use_signal(cx, || None);
-
-    UseResizeSignal {
-        signal: ReadOnlySignal::new(signal),
-        observer: use_on_resize(cx, move |entry| signal.set(Some(entry))),
-    }
-}
-
-#[derive(Clone, Copy)]
-pub struct UseResizeSignal<'a> {
-    pub signal: ReadOnlySignal<Option<ResizeObserverEntry>>,
-    pub observer: &'a Observer,
-}
-
-impl Deref for UseResizeSignal<'_> {
-    type Target = ReadOnlySignal<Option<ResizeObserverEntry>>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.signal
+        state.resize_observer.unobserve(raw_elem);
     }
 }
