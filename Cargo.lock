@@ -298,6 +298,7 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "dioxus-signals",
+ "dioxus-use-mounted",
  "dioxus-web",
  "js-sys",
  "wasm-bindgen",
@@ -324,6 +325,16 @@ dependencies = [
  "generational-box",
  "simple_logger",
  "tracing",
+]
+
+[[package]]
+name = "dioxus-use-mounted"
+version = "0.1.0"
+source = "git+https://github.com/matthunz/dioxus-use-mounted#2ef9d54ebfe6766b74ab69867e5ade5d5faa209a"
+dependencies = [
+ "dioxus",
+ "dioxus-signals",
+ "dioxus-web",
 ]
 
 [[package]]

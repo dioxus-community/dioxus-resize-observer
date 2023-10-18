@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_signals::use_signal;
 use dioxus_signals::Signal;
+use dioxus_use_mounted::UseMounted;
 use js_sys::Array;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
@@ -9,22 +10,19 @@ use web_sys::ResizeObserver;
 use web_sys::ResizeObserverEntry;
 
 /// Hook to get an element's size, updating on changes.
-pub fn use_size<T>(cx: Scope<T>, element_ref: Signal<Option<Rc<MountedData>>>) -> (f64, f64) {
-    let resize = use_resize(cx, element_ref);
+pub fn use_size<T>(cx: Scope<T>, mounted: UseMounted) -> (f64, f64) {
+    let resize = use_resize(cx, mounted);
     let resize_ref = resize.read();
     resize_ref.unwrap_or_default()
 }
 
 /// Hook to get an element's resize events, updating on changes.
-pub fn use_resize<T>(
-    cx: Scope<T>,
-    element_ref: Signal<Option<Rc<MountedData>>>,
-) -> Signal<Option<(f64, f64)>> {
+pub fn use_resize<T>(cx: Scope<T>, mounted: UseMounted) -> Signal<Option<(f64, f64)>> {
     let state_ref: Signal<Option<State>> = use_signal(cx, || None);
     let size_ref = use_signal(cx, || None);
 
     dioxus_signals::use_effect(cx, move || {
-        if let Some(mounted) = element_ref.read().clone() {
+        if let Some(mounted) = mounted.signal.read().clone() {
             maybe_unobserve(state_ref);
 
             let on_resize = Closure::<dyn FnMut(Array)>::new(move |entries: Array| {

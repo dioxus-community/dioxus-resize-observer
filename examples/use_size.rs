@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
 use dioxus_resize_observer::use_size;
-use dioxus_signals::use_signal;
+use dioxus_use_mounted::use_mounted;
 
 fn app(cx: Scope) -> Element {
-    let element_ref = use_signal(cx, || None);
-    let (width, height) = use_size(cx, element_ref);
+    let mounted = use_mounted(cx);
+    let (width, height) = use_size(cx, mounted);
 
-    render!(div { onmounted: move |event| element_ref.set(Some(event.data)), "Size: {width} x {height}" })
+    render!(div { onmounted: move |event| mounted.onmounted(event), "Size: {width} x {height}" })
 }
 
 fn main() {
