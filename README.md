@@ -7,9 +7,7 @@ Resize observer hooks for [Dioxus 🧬](https://dioxuslabs.com/).
 - **0.1.0 - Dioxus v0.4** 🧬 **git - Dioxus v0.5**
 - Web renderer (WASM)
 
-## Examples
-
-## Signals
+## Example
 ```rust
 use dioxus::prelude::*;
 use dioxus_resize_observer::use_size;
@@ -24,26 +22,6 @@ fn app(cx: Scope) -> Element {
       "Size: {width} x {height}"
     })
 }
-```
-
-## Observer
-```rust
-let (event, observer) = use_size(cx);
-let (width, height) = event
-    .map(|entry| {
-        let rect = entry.content_rect();
-        (rect.width(), rect.height())
-    })
-    .unwrap_or_default();
-
-render!(
-  div { 
-    onmounted: move |event| {
-      observer.mount(&event)
-    },
-    "Size: {width} x {height}"
-  }
-)
 ```
 
 ## License
