@@ -6,9 +6,9 @@ license = "MIT"
 description = "Resize observer hooks for Dioxus."
 
 [dependencies]
-dioxus = { git = "https://github.com/ealmloff/dioxus", branch = "fix-signals-outside-of-runtime" }
-dioxus-web = { git = "https://github.com/ealmloff/dioxus", branch = "fix-signals-outside-of-runtime" }
-dioxus-signals = { git = "https://github.com/ealmloff/dioxus", branch = "fix-signals-outside-of-runtime" }
+dioxus = { git = "https://github.com/dioxuslabs/dioxus" }
+dioxus-web = { git = "https://github.com/dioxuslabs/dioxus" }
+dioxus-signals = { git = "https://github.com/dioxuslabs/dioxus" }
 js-sys = "0.3.64"
 wasm-bindgen = "0.2.87"
 web-sys = { version = "0.3.64", features = ["ResizeObserver", "ResizeObserverEntry"] }
