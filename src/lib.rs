@@ -1,19 +1,17 @@
 use dioxus::prelude::*;
-use dioxus_signals::use_signal;
-use dioxus_signals::Signal;
 use dioxus_use_mounted::UseMounted;
 use js_sys::Array;
-use web_sys::DomRectReadOnly;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsCast;
+use web_sys::DomRectReadOnly;
 use web_sys::ResizeObserver;
 use web_sys::ResizeObserverEntry;
 
 pub type Rect = DomRectReadOnly;
 
 /// Hook to get an element's size, updating on changes.
-/// 
+///
 /// ## Examples
 /// ```
 /// use dioxus::prelude::*;
@@ -30,18 +28,20 @@ pub type Rect = DomRectReadOnly;
 ///     })
 /// }
 /// ```
-pub fn use_size<T>(cx: Scope<T>, mounted: UseMounted) -> Rect {
-    let resize = use_resize(cx, mounted);
+pub fn use_size(mounted: UseMounted) -> Rect {
+    let resize = use_resize( mounted);
     let resize_ref = resize.read();
-    resize_ref.clone().unwrap_or_else(|| DomRectReadOnly::new().unwrap())
+    resize_ref
+        .clone()
+        .unwrap_or_else(|| DomRectReadOnly::new().unwrap())
 }
 
 /// Hook to get an element's resize events as a signal.
-pub fn use_resize<T>(cx: Scope<T>, mounted: UseMounted) -> Signal<Option<Rect>> {
-    let state_ref: Signal<Option<State>> = use_signal(cx, || None);
-    let size_ref = use_signal(cx, || None);
+pub fn use_resize(mounted: UseMounted) -> Signal<Option<Rect>> {
+    let mut state_ref: Signal<Option<State>> = use_signal(|| None);
+    let mut size_ref = use_signal(|| None);
 
-    dioxus_signals::use_effect(cx, move || {
+    use_effect(move || {
         if let Some(mounted) = mounted.signal.read().clone() {
             // Unmount the previous element, if it exists
             maybe_unobserve(state_ref);
@@ -87,15 +87,11 @@ struct State {
 
 /// Utility to get the raw element from its mounted data.
 fn get_raw_element(mounted: &MountedData) -> &web_sys::Element {
-    mounted
-        .get_raw_element()
-        .unwrap()
-        .downcast_ref::<web_sys::Element>()
-        .unwrap()
+    mounted.downcast::<web_sys::Element>().unwrap()
 }
 
 /// Attempt to unobserve an element, if it exists.
-fn maybe_unobserve(state_ref: Signal<Option<State>>) {
+fn maybe_unobserve(mut state_ref: Signal<Option<State>>) {
     if let Some(state) = state_ref.write().take() {
         let raw_elem = get_raw_element(&state.mounted);
         state.resize_observer.unobserve(raw_elem);
