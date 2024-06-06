@@ -7,11 +7,6 @@
 # dioxus-resize-observer
 Resize observer hooks for [Dioxus 🧬](https://dioxuslabs.com/).
 
-## Support
-- Web renderer (WASM)
-  - **0.1.0 - Dioxus v0.4**
-  - **0.2.0 - Dioxus v0.5**
-
 ## Example
 ```rust
 use dioxus::prelude::*;
@@ -28,6 +23,11 @@ fn app() -> Element {
     })
 }
 ```
+
+## Support
+- Web renderer (WASM)
+  - **0.1.0 - Dioxus v0.4**
+  - **0.2.0 - Dioxus v0.5**
 
 ## License
 MIT
