@@ -1,4 +1,3 @@
-
 # dioxus-resize-observer
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/dioxus-community/dioxus-resize-observer#license)
 [![Crates.io](https://img.shields.io/crates/v/dioxus-resize-observer.svg)](https://crates.io/crates/dioxus-resize-observer)
@@ -29,6 +28,7 @@ fn app() -> Element {
 - Web renderer (WASM)
   - **0.1.0 - Dioxus v0.4**
   - **0.2.0 - Dioxus v0.5**
+  - **0.3.0 - Dioxus v0.6**
 
 ## License
 MIT
