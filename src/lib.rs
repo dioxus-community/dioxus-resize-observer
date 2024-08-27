@@ -20,11 +20,11 @@ pub type Rect = DomRectReadOnly;
 ///
 /// fn app() -> Element {
 ///     let mounted = use_mounted();
-///     let (width, height) = use_size(mounted);
+///     let size = use_size(mounted);
 ///
 ///     rsx!(div {
 ///         onmounted: move |event| mounted.onmounted(event),
-///         "Size: {width} x {height}"
+///         "Size: {size.width()} x {size.height()}"
 ///     })
 /// }
 /// ```
