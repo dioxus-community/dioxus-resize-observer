@@ -29,7 +29,7 @@ pub type Rect = DomRectReadOnly;
 /// }
 /// ```
 pub fn use_size(mounted: UseMounted) -> Rect {
-    let resize = use_resize( mounted);
+    let resize = use_resize(mounted);
     let resize_ref = resize.read();
     resize_ref
         .clone()
