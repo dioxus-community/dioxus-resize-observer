@@ -18,18 +18,18 @@ pub type Rect = DomRectReadOnly;
 /// use dioxus_resize_observer::use_size;
 /// use dioxus_use_mounted::use_mounted;
 ///
-/// fn app(cx: Scope) -> Element {
-///     let mounted = use_mounted(cx);
-///     let (width, height) = use_size(cx, mounted);
+/// fn app() -> Element {
+///     let mounted = use_mounted();
+///     let size = use_size(mounted);
 ///
-///     render!(div {
+///     rsx!(div {
 ///         onmounted: move |event| mounted.onmounted(event),
-///         "Size: {width} x {height}"
+///         "Size: {size.width()} x {size.height()}"
 ///     })
 /// }
 /// ```
 pub fn use_size(mounted: UseMounted) -> Rect {
-    let resize = use_resize( mounted);
+    let resize = use_resize(mounted);
     let resize_ref = resize.read();
     resize_ref
         .clone()

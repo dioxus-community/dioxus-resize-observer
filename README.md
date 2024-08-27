@@ -17,7 +17,7 @@ fn app() -> Element {
     let mounted = use_mounted();
     let (width, height) = use_size(mounted);
 
-    render!(div {
+    rsx!(div {
       onmounted: move |event| mounted.onmounted(event),
       "Size: {width} x {height}"
     })
