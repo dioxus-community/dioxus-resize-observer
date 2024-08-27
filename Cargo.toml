@@ -14,4 +14,4 @@ web-sys = { version = "0.3.69", features = ["Element", "DomRectReadOnly", "Resiz
 dioxus-use-mounted = { git = "https://github.com/dioxus-community/dioxus-use-mounted", branch = "feat/dioxus-0.6" }
 
 [dev-dependencies]
-dioxus-web = "0.6.0-alpha.0"
+dioxus-web = "0.6.0-alpha.2"
