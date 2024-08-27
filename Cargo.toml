@@ -1,6 +1,6 @@
 [package]
 name = "dioxus-resize-observer"
-version = "0.3.0-alpha.2"
+version = "0.3.0-alpha.3"
 edition = "2021"
 license = "MIT"
 description = "Resize observer hooks for Dioxus."
