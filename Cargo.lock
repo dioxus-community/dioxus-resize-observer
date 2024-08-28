@@ -537,7 +537,7 @@ dependencies = [
 
 [[package]]
 name = "dioxus-resize-observer"
-version = "0.3.0-alpha.1"
+version = "0.3.0-alpha.3"
 dependencies = [
  "dioxus",
  "dioxus-use-mounted",
@@ -582,9 +582,9 @@ dependencies = [
 
 [[package]]
 name = "dioxus-use-mounted"
-version = "0.3.0-alpha.1"
+version = "0.3.0-alpha.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad6bcb4538e1ec16fbebc937e30a41a1fbcc882064a38040df31df29db2f9d4b"
+checksum = "2483b57b229cc108f28ff56a57698e59a05b703944c0bc5776c5a94f0a11598e"
 dependencies = [
  "dioxus",
 ]
