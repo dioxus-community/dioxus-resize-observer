@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 use dioxus_use_mounted::UseMounted;
+use dioxus_web::WebEventExt;
 use js_sys::Array;
 use std::rc::Rc;
 use wasm_bindgen::closure::Closure;
@@ -56,7 +57,7 @@ pub fn use_resize(mounted: UseMounted) -> Signal<Option<Rect>> {
 
             // Observe the raw element with the resize observer.
             let raw_elem = get_raw_element(&mounted);
-            resize_observer.observe(raw_elem);
+            resize_observer.observe(&raw_elem);
 
             // Update the current state.
             state_ref.set(Some(State {
@@ -86,14 +87,14 @@ struct State {
 }
 
 /// Utility to get the raw element from its mounted data.
-fn get_raw_element(mounted: &MountedData) -> &web_sys::Element {
-    mounted.downcast::<web_sys::Element>().unwrap()
+fn get_raw_element(mounted: &MountedData) -> web_sys::Element {
+    mounted.try_as_web_event().unwrap()
 }
 
 /// Attempt to unobserve an element, if it exists.
 fn maybe_unobserve(mut state_ref: Signal<Option<State>>) {
     if let Some(state) = state_ref.write().take() {
         let raw_elem = get_raw_element(&state.mounted);
-        state.resize_observer.unobserve(raw_elem);
+        state.resize_observer.unobserve(&raw_elem);
     }
 }
