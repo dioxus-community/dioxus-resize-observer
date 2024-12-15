@@ -1,15 +1,15 @@
 [package]
 name = "dioxus-resize-observer"
-version = "0.3.0-alpha.4"
+version = "0.3.0"
 edition = "2021"
 license = "MIT"
 description = "Resize observer hooks for Dioxus."
 repository = "https://github.com/dioxus-community/dioxus-resize-observer"
 
 [dependencies]
-dioxus = "0.6.0-alpha.3"
-dioxus-web = "0.6.0-alpha.3"
+dioxus = "0.6.0"
+dioxus-web = "0.6.0"
 js-sys = "0.3.72"
 wasm-bindgen = "0.2.95"
 web-sys = { version = "0.3.72", features = ["Element", "DomRectReadOnly", "ResizeObserver", "ResizeObserverEntry"] }
-dioxus-use-mounted = "0.3.0-alpha.4"
+dioxus-use-mounted = "0.3.0"
